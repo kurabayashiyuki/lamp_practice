@@ -3,37 +3,67 @@ require_once MODEL_PATH . 'functions.php';
 require_once MODEL_PATH . 'db.php';
 
 function get_user($db, $user_id){
-  $sql = "
-    SELECT
-      user_id, 
-      name,
-      password,
-      type
-    FROM
-      users
-    WHERE
-      user_id = {$user_id}
-    LIMIT 1
-  ";
 
-  return fetch_query($db, $sql);
+  try {
+    $sql = "
+      SELECT
+        user_id, 
+        name,
+        password,
+        type
+      FROM
+        users
+      WHERE
+        user_id = ?
+      LIMIT 1
+    ";
+      //準備
+      $stmt = $dbh->prepare($sql);
+      //SQL文をプレースホルダに値をバインド
+      $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
+      //SQLを実行
+      $stmt->execute();
+      // レコードの取得
+      $rows = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+
+throw $e;
+
+}
+
 }
 
 function get_user_by_name($db, $name){
-  $sql = "
-    SELECT
-      user_id, 
-      name,
-      password,
-      type
-    FROM
-      users
-    WHERE
-      name = '{$name}'
-    LIMIT 1
-  ";
 
-  return fetch_query($db, $sql);
+  try {
+    $sql = "
+      SELECT
+        user_id, 
+        name,
+        password,
+        type
+      FROM
+        users
+      WHERE
+        name = ?
+      LIMIT 1
+    ";
+      //準備
+      $stmt = $dbh->prepare($sql);
+      //SQL文をプレースホルダに値をバインド
+      $stmt->bindValue(1, $name, PDO::PARAM_STR);
+      //SQLを実行
+      $stmt->execute();
+      // レコードの取得
+      $rows = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+
+throw $e;
+
+}
+
 }
 
 function login_as($db, $name, $password){
@@ -101,12 +131,28 @@ function is_valid_password($password, $password_confirmation){
 }
 
 function insert_user($db, $name, $password){
-  $sql = "
-    INSERT INTO
-      users(name, password)
-    VALUES ('{$name}', '{$password}');
-  ";
 
-  return execute_query($db, $sql);
+  try {
+    $sql = "
+      INSERT INTO
+        users(name, password)
+      VALUES (?, ?);
+    ";
+      //準備
+      $stmt = $dbh->prepare($sql);
+      //SQL文をプレースホルダに値をバインド
+      $stmt->bindValue(1, $name, PDO::PARAM_STR);
+      $stmt->bindValue(2, $password, PDO::PARAM_STR);
+      //SQLを実行
+      $stmt->execute();
+      // レコードの取得
+      $rows = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+
+throw $e;
+
+}
+
 }
 
