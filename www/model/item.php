@@ -4,9 +4,7 @@ require_once MODEL_PATH . 'db.php';
 
 // DB利用
 
-function get_item($db, $item_id){
-
-  try {
+function get_item($db, $item_id) {
     $sql = "
       SELECT
         item_id,
@@ -20,27 +18,13 @@ function get_item($db, $item_id){
       WHERE
         item_id = ?
     ";
-      //準備
-      $stmt = $dbh->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $item_id, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
+     fetch_query($db, $sql, [$item_id]);
 }
 
-}
-
-function get_items($db, $is_open = false){
+function get_items($db, $is_open = false) {
   $sql = '
     SELECT
-      item_id, 
+      item_id,
       name,
       stock,
       price,
@@ -76,20 +60,19 @@ function regist_item($db, $name, $price, $stock, $status, $image){
 
 function regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename){
   $db->beginTransaction();
-  if(insert_item($db, $name, $price, $stock, $filename, $status) 
+  if(insert_item($db, $name, $price, $stock, $filename, $status)
     && save_image($image, $filename)){
     $db->commit();
     return true;
   }
   $db->rollback();
   return false;
-  
+
 }
 
-function insert_item($db, $name, $price, $stock, $filename, $status){
+function insert_item($db, $name, $price, $stock, $filename, $status)
+{
   $status_value = PERMITTED_ITEM_STATUSES[$status];
-
-  try {
     $sql = "
       INSERT INTO
         items(
@@ -101,30 +84,11 @@ function insert_item($db, $name, $price, $stock, $filename, $status){
         )
       VALUES(?, ?, ?, ?, ?);
     ";
-      //準備
-      $stmt = $dbh->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $name, PDO::PARAM_STR);
-      $stmt->bindValue(2, $price, PDO::PARAM_INT);
-      $stmt->bindValue(3, $stock, PDO::PARAM_INT);
-      $stmt->bindValue(4, $filename, PDO::PARAM_STR);
-      $stmt->bindValue(5, $status_value, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
+      execute_query($db, $sql, [$name, $price, $stock, $filename, $status]);
 }
 
-}
-
-function update_item_status($db, $item_id, $status){
-
-  try {
+function update_item_status($db, $item_id, $status)
+{
   $sql = "
     UPDATE
       items
@@ -134,27 +98,11 @@ function update_item_status($db, $item_id, $status){
       item_id = ?
     LIMIT 1
   ";
-      //準備
-      $stmt = $dbh->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $item_id, PDO::PARAM_INT);
-      $stmt->bindValue(2, $status, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
+    execute_query($db, $sql, [$item_id, $status]);
+  }
 
-} catch (PDOException $e) {
-
-throw $e;
-
-}
-
-}
-
-function update_item_stock($db, $item_id, $stock){
-
-  try {
+function update_item_stock($db, $item_id, $stock)
+{
     $sql = "
       UPDATE
         items
@@ -164,23 +112,7 @@ function update_item_stock($db, $item_id, $stock){
         item_id = ?
       LIMIT 1
     ";
-      //準備
-      $stmt = $dbh->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $stock, PDO::PARAM_INT);
-      $stmt->bindValue(2, $item_id, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
-}
-
-}
+      execute_query($db, $sql, [$item_id, $stock]);
 
 function destroy_item($db, $item_id){
   $item = get_item($db, $item_id);
@@ -207,22 +139,8 @@ function delete_item($db, $item_id){
         item_id = ?
       LIMIT 1
     ";
-      //準備
-      $stmt = $dbh->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $item_id, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
-}
-
-}
+    execute_query($db, $sql, [$item_id]);
+  }
 
 
 // 非DB

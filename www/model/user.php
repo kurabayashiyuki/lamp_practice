@@ -7,7 +7,7 @@ function get_user($db, $user_id){
   try {
     $sql = "
       SELECT
-        user_id, 
+        user_id,
         name,
         password,
         type
@@ -18,7 +18,7 @@ function get_user($db, $user_id){
       LIMIT 1
     ";
       //準備
-      $stmt = $dbh->prepare($sql);
+      $stmt = $db->prepare($sql);
       //SQL文をプレースホルダに値をバインド
       $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
       //SQLを実行
@@ -39,7 +39,7 @@ function get_user_by_name($db, $name){
   try {
     $sql = "
       SELECT
-        user_id, 
+        user_id,
         name,
         password,
         type
@@ -50,17 +50,18 @@ function get_user_by_name($db, $name){
       LIMIT 1
     ";
       //準備
-      $stmt = $dbh->prepare($sql);
+      $stmt = $db->prepare($sql);
       //SQL文をプレースホルダに値をバインド
       $stmt->bindValue(1, $name, PDO::PARAM_STR);
       //SQLを実行
       $stmt->execute();
       // レコードの取得
-      $rows = $stmt->fetchAll();
+      return $stmt->fetch();
 
-} catch (PDOException $e) {
+} catch(PDOException $e) {
 
-throw $e;
+  set_error('データ取得に失敗しました。');
+  return false;
 
 }
 
@@ -85,7 +86,7 @@ function regist_user($db, $name, $password, $password_confirmation) {
   if( is_valid_user($name, $password, $password_confirmation) === false){
     return false;
   }
-  
+
   return insert_user($db, $name, $password);
 }
 
@@ -139,7 +140,7 @@ function insert_user($db, $name, $password){
       VALUES (?, ?);
     ";
       //準備
-      $stmt = $dbh->prepare($sql);
+      $stmt = $db->prepare($sql);
       //SQL文をプレースホルダに値をバインド
       $stmt->bindValue(1, $name, PDO::PARAM_STR);
       $stmt->bindValue(2, $password, PDO::PARAM_STR);
