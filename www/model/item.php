@@ -4,28 +4,27 @@ require_once MODEL_PATH . 'db.php';
 
 // DB利用
 
-function get_item($db, $item_id){
-  $sql = "
-    SELECT
-      item_id, 
-      name,
-      stock,
-      price,
-      image,
-      status
-    FROM
-      items
-    WHERE
-      item_id = {$item_id}
-  ";
-
-  return fetch_query($db, $sql);
+function get_item($db, $item_id) {
+    $sql = "
+      SELECT
+        item_id,
+        name,
+        stock,
+        price,
+        image,
+        status
+      FROM
+        items
+      WHERE
+        item_id = ?
+    ";
+     fetch_query($db, $sql, [$item_id]);
 }
 
-function get_items($db, $is_open = false){
+function get_items($db, $is_open = false) {
   $sql = '
     SELECT
-      item_id, 
+      item_id,
       name,
       stock,
       price,
@@ -61,59 +60,59 @@ function regist_item($db, $name, $price, $stock, $status, $image){
 
 function regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename){
   $db->beginTransaction();
-  if(insert_item($db, $name, $price, $stock, $filename, $status) 
+  if(insert_item($db, $name, $price, $stock, $filename, $status)
     && save_image($image, $filename)){
     $db->commit();
     return true;
   }
   $db->rollback();
   return false;
-  
+
 }
 
-function insert_item($db, $name, $price, $stock, $filename, $status){
+function insert_item($db, $name, $price, $stock, $filename, $status)
+{
   $status_value = PERMITTED_ITEM_STATUSES[$status];
-  $sql = "
-    INSERT INTO
-      items(
-        name,
-        price,
-        stock,
-        image,
-        status
-      )
-    VALUES('{$name}', {$price}, {$stock}, '{$filename}', {$status_value});
-  ";
-
-  return execute_query($db, $sql);
+    $sql = "
+      INSERT INTO
+        items(
+          name,
+          price,
+          stock,
+          image,
+          status
+        )
+      VALUES(?, ?, ?, ?, ?);
+    ";
+      execute_query($db, $sql, [$name, $price, $stock, $filename, $status]);
 }
 
-function update_item_status($db, $item_id, $status){
+function update_item_status($db, $item_id, $status)
+{
   $sql = "
     UPDATE
       items
     SET
-      status = {$status}
+      status = ?
     WHERE
-      item_id = {$item_id}
+      item_id = ?
     LIMIT 1
   ";
-  
-  return execute_query($db, $sql);
-}
+    execute_query($db, $sql, [$status, $item_id]);
+  }
 
-function update_item_stock($db, $item_id, $stock){
-  $sql = "
-    UPDATE
-      items
-    SET
-      stock = {$stock}
-    WHERE
-      item_id = {$item_id}
-    LIMIT 1
-  ";
-  
-  return execute_query($db, $sql);
+function update_item_stock($db, $item_id, $stock)
+{
+    $sql = "
+      UPDATE
+        items
+      SET
+        stock = ?
+      WHERE
+        item_id = ?
+      LIMIT 1
+    ";
+      execute_query($db, $sql, [$stock, $item_id]);
 }
 
 function destroy_item($db, $item_id){
@@ -132,16 +131,16 @@ function destroy_item($db, $item_id){
 }
 
 function delete_item($db, $item_id){
-  $sql = "
-    DELETE FROM
-      items
-    WHERE
-      item_id = {$item_id}
-    LIMIT 1
-  ";
   
-  return execute_query($db, $sql);
-}
+    $sql = "
+      DELETE FROM
+        items
+      WHERE
+        item_id = ?
+      LIMIT 1
+    ";
+    execute_query($db, $sql, [$item_id]);
+  }
 
 
 // 非DB
