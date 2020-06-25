@@ -4,7 +4,6 @@ require_once MODEL_PATH . 'db.php';
 
 function get_user($db, $user_id){
 
-  try {
     $sql = "
       SELECT
         user_id,
@@ -17,26 +16,11 @@ function get_user($db, $user_id){
         user_id = ?
       LIMIT 1
     ";
-      //準備
-      $stmt = $db->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $user_id, PDO::PARAM_INT);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
-}
-
-}
+      fetch_query($db, $sql, [$user_id]);
+  }
 
 function get_user_by_name($db, $name){
 
-  try {
     $sql = "
       SELECT
         user_id,
@@ -49,22 +33,7 @@ function get_user_by_name($db, $name){
         name = ?
       LIMIT 1
     ";
-      //準備
-      $stmt = $db->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $name, PDO::PARAM_STR);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      return $stmt->fetch();
-
-} catch(PDOException $e) {
-
-  set_error('データ取得に失敗しました。');
-  return false;
-
-}
-
+      fetch_query($db, $sql, [$name]);
 }
 
 function login_as($db, $name, $password){
@@ -133,27 +102,10 @@ function is_valid_password($password, $password_confirmation){
 
 function insert_user($db, $name, $password){
 
-  try {
     $sql = "
       INSERT INTO
         users(name, password)
       VALUES (?, ?);
     ";
-      //準備
-      $stmt = $db->prepare($sql);
-      //SQL文をプレースホルダに値をバインド
-      $stmt->bindValue(1, $name, PDO::PARAM_STR);
-      $stmt->bindValue(2, $password, PDO::PARAM_STR);
-      //SQLを実行
-      $stmt->execute();
-      // レコードの取得
-      $rows = $stmt->fetchAll();
-
-} catch (PDOException $e) {
-
-throw $e;
-
+      execute_query($db, $sql, [$name, $password]);
 }
-
-}
-

@@ -98,7 +98,7 @@ function update_item_status($db, $item_id, $status)
       item_id = ?
     LIMIT 1
   ";
-    execute_query($db, $sql, [$item_id, $status]);
+    execute_query($db, $sql, [$status, $item_id]);
   }
 
 function update_item_stock($db, $item_id, $stock)
@@ -112,7 +112,8 @@ function update_item_stock($db, $item_id, $stock)
         item_id = ?
       LIMIT 1
     ";
-      execute_query($db, $sql, [$item_id, $stock]);
+      execute_query($db, $sql, [$stock, $item_id]);
+}
 
 function destroy_item($db, $item_id){
   $item = get_item($db, $item_id);
@@ -130,8 +131,7 @@ function destroy_item($db, $item_id){
 }
 
 function delete_item($db, $item_id){
-
-  try {
+  
     $sql = "
       DELETE FROM
         items
