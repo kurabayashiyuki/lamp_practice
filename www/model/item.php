@@ -18,7 +18,7 @@ function get_item($db, $item_id) {
       WHERE
         item_id = ?
     ";
-     fetch_query($db, $sql, [$item_id]);
+    return fetch_query($db, $sql, [$item_id]);
 }
 
 function get_items($db, $is_open = false) {
@@ -84,7 +84,7 @@ function insert_item($db, $name, $price, $stock, $filename, $status)
         )
       VALUES(?, ?, ?, ?, ?);
     ";
-      execute_query($db, $sql, [$name, $price, $stock, $filename, $status]);
+     return execute_query($db, $sql, [$name, $price, $stock, $filename, $status]);
 }
 
 function update_item_status($db, $item_id, $status)
@@ -98,7 +98,7 @@ function update_item_status($db, $item_id, $status)
       item_id = ?
     LIMIT 1
   ";
-    execute_query($db, $sql, [$status, $item_id]);
+   return execute_query($db, $sql, [$status, $item_id]);
   }
 
 function update_item_stock($db, $item_id, $stock)
@@ -112,7 +112,7 @@ function update_item_stock($db, $item_id, $stock)
         item_id = ?
       LIMIT 1
     ";
-      execute_query($db, $sql, [$stock, $item_id]);
+    return  execute_query($db, $sql, [$stock, $item_id]);
 }
 
 function destroy_item($db, $item_id){
@@ -139,7 +139,7 @@ function delete_item($db, $item_id){
         item_id = ?
       LIMIT 1
     ";
-    execute_query($db, $sql, [$item_id]);
+   return execute_query($db, $sql, [$item_id]);
   }
 
 
