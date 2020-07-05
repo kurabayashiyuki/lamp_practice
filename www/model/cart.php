@@ -108,6 +108,9 @@ function purchase_carts($db, $carts)
   if (validate_cart_purchase($carts) === false) {
     return false;
   }
+
+  $db -> beginTransaction();
+
   foreach ($carts as $cart) {
     if (update_item_stock(
       $db,
@@ -119,7 +122,16 @@ function purchase_carts($db, $carts)
   }
 
   delete_user_carts($db, $carts[0]['user_id']);
+
+  add_purchase_data($db, $carts);
+ if (has_error()){
+   $db -> rollback();
+ } else {
+   $db -> commit();
+ }
+
 }
+
 
 function delete_user_carts($db, $user_id)
 {
@@ -161,3 +173,36 @@ function validate_cart_purchase($carts)
   }
   return true;
 }
+
+
+function add_purchase_data($db, $carts)
+{
+  if (add_history($db, $carts[0]['user_id'], sum_carts($carts)) === false){
+    return false;
+  }
+  $order_id = $db->lastInsertId('order_id');
+  foreach($carts as $cart)
+  {
+  if (add_statement($db, $order_id, $cart['item_id'], $cart['price'], $cart['amount']) === false){
+    return false;
+  }
+  }
+}
+
+function add_history($db, $user_id, $total)
+{
+    $sql = "
+      INSERT INTO purchase_history(user_id, sum_purchase)
+      VALUES (?, ?)
+    ";
+   return execute_query($db, $sql, [$user_id, $total]);
+  }
+
+function add_statement($db, $order_id, $item_id, $price, $amount)
+{
+    $sql = "
+      INSERT INTO purchase_statement(order_id, item_id, price, amount)
+      VALUES (?, ?, ?, ?)
+      ";
+      return execute_query($db, $sql, [$order_id, $item_id, $price, $amount]);
+  }
