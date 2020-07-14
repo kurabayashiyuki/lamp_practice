@@ -13,21 +13,11 @@ if(is_logined() === false){
 
 $db = get_db_connect();
 $user = get_login_user($db);
-
-$cart_id = get_post('cart_id');
-
-$token = get_post('token');
-
-if (is_valid_csrf_token($token)){
-  if(delete_cart($db, $cart_id)){
-    set_message('カートを削除しました。');
-  } else {
-    set_error('カートの削除に失敗しました。');
-  }
+if (is_admin($user)){
+  $purchase_history = purchase_history($db);
 } else {
-  set_error('不正な操作が行われました');
+  $purchase_history = purchase_history($db, $user['user_id']);
 }
 
 
-
-redirect_to(CART_URL);
+include_once '../view/purchase_history_view.php';
