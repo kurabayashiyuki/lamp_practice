@@ -24,12 +24,12 @@ function get_user_carts($db, $user_id)
     WHERE
       carts.user_id = ?
   ";
-   return fetch_all_query($db, $sql, [$user_id]);
+  return fetch_all_query($db, $sql, [$user_id]);
 }
 
 function get_user_cart($db, $user_id, $item_id)
 {
-    $sql = "
+  $sql = "
     SELECT
       items.item_id,
       items.name,
@@ -51,7 +51,7 @@ function get_user_cart($db, $user_id, $item_id)
     AND
       items.item_id = ?
   ";
-   return fetch_query($db, $sql, [$user_id, $item_id]);
+  return fetch_query($db, $sql, [$user_id, $item_id]);
 }
 
 function add_cart($db, $user_id, $item_id)
@@ -65,7 +65,7 @@ function add_cart($db, $user_id, $item_id)
 
 function insert_cart($db, $user_id, $item_id, $amount = 1)
 {
-    $sql = "
+  $sql = "
       INSERT INTO
         carts(
           item_id,
@@ -74,12 +74,12 @@ function insert_cart($db, $user_id, $item_id, $amount = 1)
         )
       VALUES(?, ?, ?)
     ";
-   return execute_query($db, $sql, [$item_id, $user_id, $amount]);
+  return execute_query($db, $sql, [$item_id, $user_id, $amount]);
 }
 
 function update_cart_amount($db, $cart_id, $amount)
 {
-    $sql = "
+  $sql = "
       UPDATE
         carts
       SET
@@ -88,19 +88,19 @@ function update_cart_amount($db, $cart_id, $amount)
         cart_id = ?
       LIMIT 1
     ";
-   return execute_query($db, $sql, [$amount, $cart_id]);
+  return execute_query($db, $sql, [$amount, $cart_id]);
 }
 
 function delete_cart($db, $cart_id)
 {
-    $sql = "
+  $sql = "
       DELETE FROM
         carts
       WHERE
         cart_id = ?
       LIMIT 1
     ";
-   return execute_query($db, $sql, [$cart_id]);
+  return execute_query($db, $sql, [$cart_id]);
 }
 
 function purchase_carts($db, $carts)
@@ -109,7 +109,7 @@ function purchase_carts($db, $carts)
     return false;
   }
 
-  $db -> beginTransaction();
+  $db->beginTransaction();
 
   foreach ($carts as $cart) {
     if (update_item_stock(
@@ -124,24 +124,23 @@ function purchase_carts($db, $carts)
   delete_user_carts($db, $carts[0]['user_id']);
 
   add_purchase_data($db, $carts);
- if (has_error()){
-   $db -> rollback();
- } else {
-   $db -> commit();
- }
-
+  if (has_error()) {
+    $db->rollback();
+  } else {
+    $db->commit();
+  }
 }
 
 
 function delete_user_carts($db, $user_id)
 {
-    $sql = "
+  $sql = "
       DELETE FROM
         carts
       WHERE
         user_id = ?
     ";
-   return execute_query($db, $sql, [$user_id]);
+  return execute_query($db, $sql, [$user_id]);
 }
 
 
@@ -177,32 +176,76 @@ function validate_cart_purchase($carts)
 
 function add_purchase_data($db, $carts)
 {
-  if (add_history($db, $carts[0]['user_id'], sum_carts($carts)) === false){
+  if (add_history($db, $carts[0]['user_id'], sum_carts($carts)) === false) {
     return false;
   }
   $order_id = $db->lastInsertId('order_id');
-  foreach($carts as $cart)
-  {
-  if (add_statement($db, $order_id, $cart['item_id'], $cart['price'], $cart['amount']) === false){
-    return false;
-  }
+  foreach ($carts as $cart) {
+    if (add_statement($db, $order_id, $cart['item_id'], $cart['price'], $cart['amount']) === false) {
+      return false;
+    }
   }
 }
 
 function add_history($db, $user_id, $total)
 {
-    $sql = "
+  $sql = "
       INSERT INTO purchase_history(user_id, sum_purchase)
       VALUES (?, ?)
     ";
-   return execute_query($db, $sql, [$user_id, $total]);
-  }
+  return execute_query($db, $sql, [$user_id, $total]);
+}
 
 function add_statement($db, $order_id, $item_id, $price, $amount)
 {
-    $sql = "
+  $sql = "
       INSERT INTO purchase_statement(order_id, item_id, price, amount)
       VALUES (?, ?, ?, ?)
       ";
-      return execute_query($db, $sql, [$order_id, $item_id, $price, $amount]);
+  return execute_query($db, $sql, [$order_id, $item_id, $price, $amount]);
+}
+
+function purchase_history($db, $user_id = null)
+{
+  $var = [];
+  $sql =  "
+        SELECT 
+          purchase_history.order_id,
+          purchase_history.sum_purchase,
+          purchase_history.created
+        FROM
+          purchase_history";
+  if ($user_id !== null) {
+    $sql .=  " WHERE
+          purchase_history.user_id = ?";
+    $var[] = $user_id;
   }
+  return fetch_all_query($db, $sql, $var);
+}
+
+function purchase_statement($db, $order_id, $user_id = null)
+{
+  $var = [$order_id];
+  $sql =  "
+        SELECT
+          items.name,
+          purchase_statement.price,
+          purchase_statement.amount,
+          purchase_statement.price * amount as subtotal
+        FROM
+          purchase_statement
+        JOIN
+          items
+        ON
+          purchase_statement.item_id = items.item_id
+        WHERE
+          purchase_statement.order_id = ?
+        ";
+  if ($user_id !== null) {
+    $sql .= "AND exists(SELECT * FROM purchase_history WHERE order_id = purchase_statement.order_id AND user_id = ?)";
+    $var[] = $user_id;
+  }
+  // var_dump($sql,$order_id,$user_id);
+  return fetch_all_query($db, $sql, $var);
+}
+// 小計の出し方がわからない
