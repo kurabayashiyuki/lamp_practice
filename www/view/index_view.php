@@ -14,6 +14,14 @@
     <h1>商品一覧</h1>
     <?php include VIEW_PATH . 'templates/messages.php'; ?>
 
+    <form>
+    <select name="sort">
+    <option value="new">新着順</option>
+    <option value="low">安い順</option>
+    <option value="high">高い順</option>
+    </select>
+    </form>
+
     <div class="card-deck">
       <div class="row">
       <?php foreach($items as $item){ ?>
