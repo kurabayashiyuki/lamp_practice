@@ -28,9 +28,9 @@
       <div class="sort">
         <form> 　
           <select name="sort">
-            <option value="new">新着順</option>
-            <option value="low">安い順</option>
-            <option value="high">高い順</option>
+            <option value="new"<?php if($sort === 'new')print 'selected';?>>新着順</option>
+            <option value="low"<?php if($sort === 'low')print 'selected';?>>安い順</option>
+            <option value="high"<?php if($sort === 'high')print 'selected';?>>高い順</option>
           </select>
           <input id="submit_btn" type="submit" value="決定">
         </form>

@@ -42,10 +42,10 @@ function get_items($db, $sort, $is_open = false) {
         $sql .= ' ORDER BY created DESC ';
       break;
       case 'low':
-        $sql .= ' ORDER BY price DESC ';
+        $sql .= ' ORDER BY price  ';
       break;
         case 'high':
-          $sql .= ' ORDER BY price ';
+          $sql .= ' ORDER BY price DESC';
         break;
         default:
     }
