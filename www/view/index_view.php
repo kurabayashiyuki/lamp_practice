@@ -22,9 +22,9 @@
 
 
   <div class="container">
+      <?php include VIEW_PATH . 'templates/messages.php'; ?>
     <div class="flex">
       <h1>商品一覧</h1>
-      <?php include VIEW_PATH . 'templates/messages.php'; ?>
       <div class="sort">
         <form> 　
           <select name="sort">
